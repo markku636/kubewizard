@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  kubewizard-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kubewizard-api
+    ports:
+      - "8000:8000"
+    environment:
+      # AI Configuration
+      - AI_GOOGLE_API_KEY=${AI_GOOGLE_API_KEY}
+      - AI_MODEL=${AI_MODEL:-gemini-2.0-flash-exp}
+      - AI_TEMPERATURE=${AI_TEMPERATURE:-0.7}
+      
+      # LINE Bot Configuration (optional)
+      - LINE_CHANNEL_SECRET=${LINE_CHANNEL_SECRET:-}
+      - LINE_CHANNEL_ACCESS_TOKEN=${LINE_CHANNEL_ACCESS_TOKEN:-}
+      
+      # Redis Configuration
+      - REDIS_URL=redis://redis:6379/0
+      
+      # Application Configuration
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - DEBUG_LEVEL=${DEBUG_LEVEL:-1}
+    
+    volumes:
+      - ./.env:/app/.env
+    
+    depends_on:
+      - redis
+    
+    restart: unless-stopped
+    
+    networks:
+      - kubewizard-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: kubewizard-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-}
+    restart: unless-stopped
+    networks:
+      - kubewizard-network
+
+  # Optional: Redis Commander for Redis management
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: kubewizard-redis-commander
+    hostname: redis-commander
+    ports:
+      - "8081:8081"
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+    depends_on:
+      - redis
+    networks:
+      - kubewizard-network
+    profiles:
+      - admin  # 使用 --profile admin 來啟動此服務
+
+volumes:
+  redis-data:
+    driver: local
+
+networks:
+  kubewizard-network:
+    driver: bridge
