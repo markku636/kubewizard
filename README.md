@@ -60,10 +60,12 @@ kubewizard/
 │   ├── config.py              # 配置管理（pydantic-settings）
 │   ├── models.py              # Pydantic 數據模型
 │   ├── memory.py              # Redis 記憶服務
+│   ├── LINE_BOT_README.md     # LINE Bot 整合說明文檔
 │   └── routers/               # API 路由模組
 │       ├── __init__.py
 │       ├── chat.py            # 聊天端點
-│       └── memory.py          # 記憶管理端點
+│       ├── memory.py          # 記憶管理端點
+│       └── linebot_webhook.py # LINE Bot Webhook 端點 🆕
 ├── tests/                      # 測試模組
 │   ├── __init__.py
 │   ├── test_units.py          # 單元測試腳本
@@ -323,6 +325,43 @@ DELETE /api/memory/{user_id}
 }
 ```
 
+### LINE Bot Webhook 端點
+
+#### Webhook Callback
+
+```http
+POST /linebot/callback
+X-Line-Signature: {signature}
+
+{LINE webhook payload}
+```
+
+此端點接收來自 LINE 平台的 webhook 事件。LINE Bot 會自動使用 KubeAgent 處理用戶訊息並回覆。
+
+#### 測試 LINE Bot 配置
+
+```http
+GET /linebot/test
+```
+
+**回應範例**:
+```json
+{
+  "status": "ok",
+  "bot_info": {
+    "display_name": "KubeWizard Bot",
+    "user_id": "U1234567890",
+    "picture_url": "https://..."
+  },
+  "config": {
+    "channel_secret": "configured",
+    "channel_access_token": "configured"
+  }
+}
+```
+
+**詳細說明**: 請參考 [LINE Bot 整合文檔](kubewizard_linebot/LINE_BOT_README.md)
+
 ## 🧪 測試
 
 ### 運行單元測試
@@ -463,7 +502,23 @@ ENABLE_FORTUNE_TOOLS=false
 1. 訪問 [LINE Developers Console](https://developers.line.biz/)
 2. 創建 Messaging API 頻道
 3. 獲取 Channel Secret 和 Channel Access Token
-4. 配置 Webhook URL 為 `https://your-domain.com/webhook`
+4. 配置 Webhook URL 為 `https://your-domain.com/linebot/callback` ⚠️ **注意路徑**
+5. 啟用 Webhook 並禁用自動回覆
+
+**LINE Bot Webhook 整合**:
+- ✅ 完整整合到 FastAPI 服務中
+- ✅ 使用相同的 KubeAgent 處理請求
+- ✅ 自動儲存對話歷史
+- 📝 詳細文檔請參考: [LINE Bot 整合說明](kubewizard_linebot/LINE_BOT_README.md)
+
+**測試 LINE Bot 配置**:
+```bash
+# 檢查配置是否正確
+curl http://localhost:8000/linebot/test
+
+# 或使用測試腳本
+python test_linebot_webhook.py
+```
 
 ### 應用配置
 

@@ -17,7 +17,7 @@ sys.path.insert(0, str(project_root))
 
 from kubewizard_linebot.config import get_settings, validate_required_settings
 from kubewizard_linebot.models import HealthResponse
-from kubewizard_linebot.routers import chat, memory
+from kubewizard_linebot.routers import chat, memory, linebot_webhook
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -38,6 +38,7 @@ app.add_middleware(
 # Include routers
 app.include_router(chat.router, prefix="/api", tags=["Chat"])
 app.include_router(memory.router, prefix="/api", tags=["Memory"])
+app.include_router(linebot_webhook.router, tags=["LINE Bot"])
 
 # Get settings
 settings = get_settings()
@@ -65,6 +66,9 @@ async def health_check():
     # Check AI configuration
     services["gemini_ai"] = "configured" if settings.ai_google_api_key else "missing"
     services["ai_model"] = settings.ai_model
+    
+    # Check LINE Bot configuration
+    services["line_bot"] = "configured" if (settings.line_channel_secret and settings.line_channel_access_token) else "not configured"
     
     # Check Redis
     try:
