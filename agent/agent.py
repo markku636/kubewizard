@@ -3,7 +3,7 @@ from typing import Optional
 from langchain_core.prompts import PromptTemplate
 from langchain.agents import create_react_agent, AgentExecutor
 from langchain.memory import ConversationBufferMemory
-from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.language_models.chat_models import BaseChatModel
 
 from .prompt import REACT_PROMPT
@@ -23,7 +23,7 @@ class KubeAgent:
 
     prompt = PromptTemplate.from_template(REACT_PROMPT, tools=tools)
 
-    def __init__(self, llm: BaseChatModel= ChatOpenAI(model="gpt-4o-mini", temperature=0.7), debug_level: Optional[int] = None):
+    def __init__(self, llm: BaseChatModel= ChatGoogleGenerativeAI(model="gemini-2.0-flash-exp", temperature=0.7, google_api_key="AIzaSyCqAFxo3_DMoFQ5aqPmfGudBT0uVVXdiFo"), debug_level: Optional[int] = None):
         self.memory = ConversationBufferMemory(memory_key="chat_history")
 
         agent = create_react_agent(llm, self.tools, self.prompt)

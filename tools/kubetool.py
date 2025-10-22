@@ -1,4 +1,5 @@
 from typing import Optional, Type, Any, Callable
+import os
 
 from pydantic import Field, BaseModel
 from langchain_core.callbacks import CallbackManagerForToolRun
@@ -29,6 +30,18 @@ class KubeTool(ShellTool):
     """Description of tool."""
 
     args_schema: Type[BaseModel] = KubeInput
+
+    def __init__(self, **kwargs):
+        """Initialize KubeTool with proper environment variables."""
+        super().__init__(**kwargs)
+        # Ensure KUBECONFIG is set from environment
+        if 'KUBECONFIG' in os.environ:
+            kubeconfig = os.environ['KUBECONFIG']
+            # Expand environment variables in the path
+            kubeconfig = os.path.expandvars(kubeconfig)
+            # Expand user home directory
+            kubeconfig = os.path.expanduser(kubeconfig)
+            os.environ['KUBECONFIG'] = kubeconfig
 
     def _run(
         self,

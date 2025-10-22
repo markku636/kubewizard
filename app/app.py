@@ -1,10 +1,18 @@
-import readline
 import time
 import signal
 from typing import Callable, Dict, List, Optional, Any
 from rich.console import Console
 from rich.prompt import Prompt
 from pyfiglet import figlet_format
+
+# Import readline module conditionally for different platforms
+try:
+    import readline
+except ImportError:
+    try:
+        import pyreadline3 as readline
+    except ImportError:
+        readline = None
 
 # Define the type for command handlers
 CommandHandler = Callable[[Console, str], None]
@@ -94,7 +102,7 @@ class ConsoleApp:
         while True:
             try:
                 user_input = Prompt.ask(f"[magenta]{self.name.lower()}>[/magenta]")
-                if user_input:
+                if user_input and readline:
                     readline.add_history(user_input)
 
                 command_parts = user_input.strip().lower().split()

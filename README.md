@@ -20,7 +20,9 @@ Run the application with interactive console:
 Add your env variables in `.env` file:
 ```sh
 OPENAI_API_KEY=your_openai_api_key
-KUBECONFIG=your_kubeconfig_path
+# For Windows: KUBECONFIG=~\.kube\config
+# For Linux/Mac: KUBECONFIG=~/.kube/config
+KUBECONFIG=~\.kube\config
 ```
 
 ```sh
