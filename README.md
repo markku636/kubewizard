@@ -33,6 +33,7 @@ KubeWizard 是一個智能的 Kubernetes 管理助手，使用 Google Gemini AI 
 - 📱 **LINE Bot 支援**: 可選的 LINE Bot 整合（需配置）
 - 🐳 **Docker 部署**: 完整的 Docker 和 Docker Compose 支援
 - 🔍 **網路搜尋**: 集成 DuckDuckGo 搜尋功能
+- 🔮 **擴展工具**: 可選的算命工具（八字測算、搖易卦、解夢等）
 - 🧪 **完整測試**: 包含單元測試和 API 測試
 - 🎨 **Rich UI**: 使用 Rich 庫提供美觀的控制台界面
 - ⚡ **模組化架構**: 清晰的代碼結構，易於維護和擴展
@@ -51,7 +52,8 @@ kubewizard/
 │   ├── kubetool.py            # Kubernetes 工具（kubectl、helm）
 │   ├── search.py              # DuckDuckGo 搜尋工具
 │   ├── request.py             # HTTP 請求工具
-│   └── human.py               # 人工協助工具
+│   ├── human.py               # 人工協助工具
+│   └── fortune_tools.py       # 算命工具（可選，需啟用）
 ├── kubewizard_linebot/        # LINE Bot API 模組
 │   ├── __init__.py
 │   ├── api.py                 # FastAPI 主應用
@@ -135,6 +137,13 @@ DEBUG_LEVEL=1
 
 # Redis Configuration（可選，未配置時使用內存存儲）
 REDIS_URL=redis://localhost:6379/0
+
+# Fortune Tools Configuration（可選，算命工具開關）
+ENABLE_FORTUNE_TOOLS=false
+
+# Fortune Telling API Keys（可選，僅在 ENABLE_FORTUNE_TOOLS=true 時需要）
+YUANFENJU_API_KEY=your_yuanfenju_api_key
+SERPAPI_API_KEY=your_serpapi_api_key
 
 # LINE Bot Configuration（可選，僅需要 LINE Bot 功能時配置）
 LINE_CHANNEL_SECRET=your_channel_secret
@@ -414,6 +423,34 @@ python tests/test_api.py
 - 如果 Redis 不可用，系統會自動使用內存存儲作為備用方案
 - 內存存儲的對話歷史在程序重啟後會丟失
 - 使用 Docker Compose 部署時會自動啟動 Redis
+
+### 算命工具配置（可選）
+
+| 變數 | 說明 | 默認值 | 必填 |
+|------|------|--------|------|
+| `ENABLE_FORTUNE_TOOLS` | 啟用算命工具（search、八字測算、搖易卦、解夢） | `false` | ❌ 否 |
+| `YUANFENJU_API_KEY` | 元分橘 API 密鑰（用於算命功能） | - | 僅啟用時需要 |
+| `SERPAPI_API_KEY` | SerpAPI 密鑰（用於進階搜尋） | - | 僅啟用時需要 |
+
+**算命工具說明**:
+- 🔮 **八字測算** (`bazi_cesuan`): 中國傳統八字命理分析
+- 🎲 **搖易卦** (`yaoyigua`): 易經占卜工具
+- 💭 **解夢** (`jiemeng`): 周公解夢功能
+- 🔍 **進階搜尋** (`search`): 使用 SerpAPI 的網路搜尋
+
+**啟用方式**:
+```env
+# 在 .env 文件中設定
+ENABLE_FORTUNE_TOOLS=true
+YUANFENJU_API_KEY=your_api_key_here
+SERPAPI_API_KEY=your_api_key_here
+```
+
+**關閉方式**（預設）:
+```env
+ENABLE_FORTUNE_TOOLS=false
+# 或完全不設定此變數
+```
 
 ### LINE Bot 配置（可選）
 
@@ -758,6 +795,44 @@ DEBUG_LEVEL=2
 
 重啟服務後會看到詳細的調試信息。
 
+### Q: 如何啟用算命工具？
+
+**A**: 
+
+1. **編輯 `.env` 文件**：
+   ```env
+   # 啟用算命工具
+   ENABLE_FORTUNE_TOOLS=true
+   
+   # 配置相關 API 密鑰
+   YUANFENJU_API_KEY=your_api_key_here
+   SERPAPI_API_KEY=your_api_key_here
+   ```
+
+2. **重啟服務**：
+   ```bash
+   # CLI 模式
+   python main.py
+   
+   # API 模式
+   python -m kubewizard_linebot.api
+   
+   # Docker 模式
+   docker-compose restart kubewizard-api
+   ```
+
+3. **確認啟用狀態**：
+   - 啟動時會顯示 "✨ 算命工具已啟用"
+   - 關閉時會顯示 "🔒 算命工具已關閉"
+
+**可用的算命工具**:
+- `bazi_cesuan`: 八字測算
+- `yaoyigua`: 搖易卦占卜
+- `jiemeng`: 解夢
+- `search`: SerpAPI 網路搜尋
+
+**注意**: 算命工具預設是關閉的，需要手動啟用並配置 API 密鑰。
+
 ### Q: LINE Bot 如何配置？
 
 **A**: 
@@ -852,6 +927,13 @@ DEBUG_LEVEL=2
 如果這個專案對你有幫助，請給它一個 ⭐️！
 
 ## 📈 版本歷史
+
+### v1.1.0 (2025-10-22)
+- ✨ 新增算命工具（八字測算、搖易卦、解夢）
+- ✨ 新增工具開關機制（ENABLE_FORTUNE_TOOLS）
+- 🌐 完整的中文化（所有 docstring 和描述）
+- 📝 更新環境變數配置說明
+- 🔧 優化工具載入邏輯
 
 ### v1.0.0 (2025-10-22)
 - ✅ 完整的 KubeAgent 功能

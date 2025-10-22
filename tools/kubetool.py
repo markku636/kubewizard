@@ -9,37 +9,41 @@ import langchain_experimental
 from utils.console import confirm
 
 def _default_approve(_input: str) -> bool:
-    msg = "Do you approve of the following input? "
+    """預設的審批函數
+    
+    詢問用戶是否批准執行輸入的命令。
+    """
+    msg = "您是否批准執行以下命令？ "
     return confirm(msg, extra=_input)
 
 class KubeInput(BaseModel):
-    """Args for the k8s tool."""
+    """Kubernetes 工具的參數模型"""
 
     commands: str = Field(
         ...,
         example="kubectl get pods",
-        description="The kubectl/helm related command to run.",
+        description="要執行的 kubectl/helm 相關命令",
     )
-    """ Kubectl commands to run."""
+    """要執行的 Kubectl 命令"""
 
 class KubeTool(ShellTool):
     name: str = "KubeTool"
-    """Name of tool."""
+    """工具名稱"""
 
-    description: str = "Tool to run k8s related commands(kubectl, helm) on the Kubernetes cluster. The input is the string command to run."
-    """Description of tool."""
+    description: str = "在 Kubernetes 集群上執行 k8s 相關命令（kubectl、helm）的工具。輸入是要執行的字串命令。"
+    """工具描述"""
 
     args_schema: Type[BaseModel] = KubeInput
 
     def __init__(self, **kwargs):
-        """Initialize KubeTool with proper environment variables."""
+        """使用適當的環境變數初始化 KubeTool"""
         super().__init__(**kwargs)
-        # Ensure KUBECONFIG is set from environment
+        # 確保從環境變數設定 KUBECONFIG
         if 'KUBECONFIG' in os.environ:
             kubeconfig = os.environ['KUBECONFIG']
-            # Expand environment variables in the path
+            # 展開路徑中的環境變數
             kubeconfig = os.path.expandvars(kubeconfig)
-            # Expand user home directory
+            # 展開用戶主目錄
             kubeconfig = os.path.expanduser(kubeconfig)
             os.environ['KUBECONFIG'] = kubeconfig
 
@@ -48,24 +52,24 @@ class KubeTool(ShellTool):
         commands: str,
         run_manager: Optional[CallbackManagerForToolRun] = None,
     ) -> str:
-        """Run commands and return final output."""
+        """執行命令並返回最終輸出"""
         commands = self._parse_commands(commands)
         return super()._run(commands)
 
     def _parse_commands(self, commands: str) -> str:
-        """Parse commands."""
+        """解析命令"""
         return commands.strip().strip('"`')
 
 class KubeToolWithApprove(KubeTool):
-    """Tool to run k8s related commands and check if need approve for the commands."""
+    """執行 k8s 相關命令並檢查是否需要審批的工具"""
 
     name: str = "KubeToolWithApprove"
-    """Name of tool."""
+    """工具名稱"""
 
     approve: Callable[[Any], bool] = _default_approve
 
-    description: str = "Tool to run k8s related commands and with approve check, if command will modify resource(delete, patch, create, update and so on) or view credential info(secret) need approve. args: type string, the raw string of command."
-    """Description of tool."""
+    description: str = "執行 k8s 相關命令並進行審批檢查的工具，如果命令會修改資源（delete、patch、create、update 等）或查看憑證資訊（secret）則需要審批。參數：字串類型，命令的原始字串。"
+    """工具描述"""
 
     args_schema: Type[BaseModel] = KubeInput
 
@@ -74,8 +78,8 @@ class KubeToolWithApprove(KubeTool):
         commands: str,
         run_manager: Optional[CallbackManagerForToolRun] = None,
     ) -> str:
-        """Run commands and return final output."""
+        """執行命令並返回最終輸出"""
         if not self.approve(commands):
-            return "Command execution aborted by user, not approved."
+            return "命令執行已被用戶中止，未獲批准。"
 
         return super()._run(commands)
