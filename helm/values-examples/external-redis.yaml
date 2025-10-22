@@ -1,0 +1,14 @@
+# 使用外部 Redis 的配置範例
+
+secrets:
+  AI_GOOGLE_API_KEY: "your-google-gemini-api-key-here"
+
+redis:
+  # 不部署內建的 Redis
+  enabled: false
+  # 使用外部 Redis
+  externalUrl: "redis://my-redis.default.svc.cluster.local:6379/0"
+  # 或使用 Redis 叢集
+  # externalUrl: "redis://redis-cluster.default.svc.cluster.local:6379/0"
+  # 或使用 Redis Sentinel
+  # externalUrl: "redis-sentinel://sentinel.default.svc.cluster.local:26379/mymaster/0"

@@ -1,0 +1,92 @@
+# 生產環境配置範例
+# 包含高可用、自動擴展、持久化儲存等
+
+replicaCount: 3
+
+image:
+  repository: your-registry.com/kubewizard
+  tag: "1.1.0"
+  pullPolicy: Always
+
+secrets:
+  AI_GOOGLE_API_KEY: "your-google-gemini-api-key-here"
+
+resources:
+  limits:
+    cpu: 2000m
+    memory: 2Gi
+  requests:
+    cpu: 1000m
+    memory: 1Gi
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+redis:
+  enabled: true
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: "fast-ssd"
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+service:
+  type: ClusterIP
+  port: 8000
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+  hosts:
+    - host: kubewizard.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: kubewizard-tls
+      hosts:
+        - kubewizard.example.com
+
+nodeSelector:
+  workload: ai-applications
+
+tolerations:
+  - key: "ai-workload"
+    operator: "Equal"
+    value: "true"
+    effect: "NoSchedule"
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - kubewizard
+          topologyKey: kubernetes.io/hostname
+
+env:
+  AI_MODEL: "gemini-2.0-flash-exp"
+  AI_TEMPERATURE: "0.5"
+  DEBUG_LEVEL: "1"
+  LOG_LEVEL: "INFO"
+  ENABLE_FORTUNE_TOOLS: "false"

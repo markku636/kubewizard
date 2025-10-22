@@ -1,0 +1,79 @@
+🎉 感謝您安裝 {{ .Chart.Name }}！
+
+您的 KubeWizard 已成功部署在命名空間：{{ .Release.Namespace }}
+
+📝 重要信息：
+
+1. 獲取應用 URL：
+{{- if .Values.ingress.enabled }}
+{{- range $host := .Values.ingress.hosts }}
+  {{- range .paths }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
+  {{- end }}
+{{- end }}
+{{- else if contains "NodePort" .Values.service.type }}
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "kubewizard.fullname" . }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo "訪問地址: http://$NODE_IP:$NODE_PORT"
+{{- else if contains "LoadBalancer" .Values.service.type }}
+  注意: 可能需要幾分鐘時間獲取 LoadBalancer IP。您可以執行以下命令查看：
+  
+  kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "kubewizard.fullname" . }}
+  
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "kubewizard.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo "訪問地址: http://$SERVICE_IP:{{ .Values.service.port }}"
+{{- else if contains "ClusterIP" .Values.service.type }}
+  kubectl --namespace {{ .Release.Namespace }} port-forward svc/{{ include "kubewizard.fullname" . }} 8000:{{ .Values.service.port }}
+  
+  然後訪問：http://127.0.0.1:8000
+{{- end }}
+
+2. 查看 Pod 狀態：
+  kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "kubewizard.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
+
+3. 查看日誌：
+  kubectl logs --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "kubewizard.name" . }}" -f
+
+4. 檢查健康狀態：
+{{- if contains "ClusterIP" .Values.service.type }}
+  kubectl --namespace {{ .Release.Namespace }} port-forward svc/{{ include "kubewizard.fullname" . }} 8000:{{ .Values.service.port }}
+  curl http://localhost:8000/health
+{{- else }}
+  # 使用上面獲取的 URL
+  curl <YOUR_URL>/health
+{{- end }}
+
+{{- if .Values.rbac.create }}
+
+✅ RBAC 權限已配置
+   - ServiceAccount: {{ include "kubewizard.serviceAccountName" . }}
+   - ClusterRole: {{ include "kubewizard.fullname" . }}
+   - Pod 現在可以存取 Kubernetes API 來執行 kubectl 命令
+
+{{- end }}
+
+{{- if .Values.redis.enabled }}
+
+✅ Redis 已部署
+   - Redis Service: {{ include "kubewizard.redis.fullname" . }}
+   - Redis URL: {{ include "kubewizard.redis.url" . }}
+   - 對話歷史將持久化保存
+
+{{- end }}
+
+⚙️  配置信息：
+   - AI Model: {{ .Values.env.AI_MODEL }}
+   - Debug Level: {{ .Values.env.DEBUG_LEVEL }}
+   - Fortune Tools: {{ .Values.env.ENABLE_FORTUNE_TOOLS }}
+
+📚 更多信息請訪問：https://github.com/markku636/kubewizard
+
+💡 提示：
+   - 訪問 /docs 查看 Swagger API 文檔
+   - 訪問 /redoc 查看 ReDoc API 文檔
+   - 使用 /api/chat 端點進行對話
+
+🐛 遇到問題？
+   - 查看 Pod 日誌獲取詳細錯誤信息
+   - 確認所有環境變數和 Secret 已正確配置
+   - 訪問 GitHub Issues: https://github.com/markku636/kubewizard/issues

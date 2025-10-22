@@ -1,0 +1,11 @@
+# 啟用算命工具的配置範例
+
+secrets:
+  AI_GOOGLE_API_KEY: "your-google-gemini-api-key-here"
+  YUANFENJU_API_KEY: "your-yuanfenju-api-key-here"
+  SERPAPI_API_KEY: "your-serpapi-api-key-here"
+
+env:
+  ENABLE_FORTUNE_TOOLS: "true"
+  AI_MODEL: "gemini-2.0-flash-exp"
+  DEBUG_LEVEL: "1"

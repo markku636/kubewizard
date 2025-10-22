@@ -1,0 +1,5 @@
+# 最小配置範例
+# 僅配置必需的 API Key
+
+secrets:
+  AI_GOOGLE_API_KEY: "your-google-gemini-api-key-here"

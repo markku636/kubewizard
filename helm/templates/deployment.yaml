@@ -1,0 +1,121 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kubewizard.fullname" . }}
+  labels:
+    {{- include "kubewizard.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "kubewizard.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "kubewizard.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "kubewizard.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+              protocol: TCP
+          env:
+            # Redis 配置
+            - name: REDIS_URL
+              value: {{ include "kubewizard.redis.url" . | quote }}
+            
+            # 從 ConfigMap 載入的環境變數
+            {{- range $key, $value := .Values.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+            
+            # 從 Secret 載入的環境變數
+            - name: AI_GOOGLE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kubewizard.secretName" . }}
+                  key: AI_GOOGLE_API_KEY
+            
+            {{- if .Values.secrets.YUANFENJU_API_KEY }}
+            - name: YUANFENJU_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kubewizard.secretName" . }}
+                  key: YUANFENJU_API_KEY
+                  optional: true
+            {{- end }}
+            
+            {{- if .Values.secrets.SERPAPI_API_KEY }}
+            - name: SERPAPI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kubewizard.secretName" . }}
+                  key: SERPAPI_API_KEY
+                  optional: true
+            {{- end }}
+            
+            {{- if .Values.secrets.LINE_CHANNEL_SECRET }}
+            - name: LINE_CHANNEL_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kubewizard.secretName" . }}
+                  key: LINE_CHANNEL_SECRET
+                  optional: true
+            {{- end }}
+            
+            {{- if .Values.secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+            - name: LINE_CHANNEL_ACCESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kubewizard.secretName" . }}
+                  key: LINE_CHANNEL_ACCESS_TOKEN
+                  optional: true
+            {{- end }}
+          
+          {{- if .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          {{- end }}
+          
+          {{- if .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          {{- end }}
+          
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

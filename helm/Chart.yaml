@@ -1,0 +1,23 @@
+apiVersion: v2
+name: kubewizard
+description: AI-powered Kubernetes management assistant with Google Gemini integration
+type: application
+version: 1.1.0
+appVersion: "1.1.0"
+
+keywords:
+  - kubernetes
+  - ai
+  - gemini
+  - chatbot
+  - automation
+
+maintainers:
+  - name: markku636
+    email: markku636@example.com
+
+home: https://github.com/markku636/kubewizard
+sources:
+  - https://github.com/markku636/kubewizard
+
+icon: https://raw.githubusercontent.com/markku636/kubewizard/main/docs/logo.png
