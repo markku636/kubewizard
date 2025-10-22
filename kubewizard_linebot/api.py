@@ -77,7 +77,7 @@ async def health_check():
     
     # Check KubeAgent
     try:
-        from agent import KubeAgent
+        from agents import KubeAgent
         services["kube_agent"] = "available"
     except Exception as e:
         services["kube_agent"] = f"error: {str(e)[:50]}"

@@ -1,6 +1,6 @@
 import dotenv
 
-from agent import KubeAgent
+from agents import KubeAgent
 from app import ConsoleApp, Handler
 
 

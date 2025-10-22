@@ -30,7 +30,7 @@ async def chat(request: ChatRequest):
     
     try:
         # Import KubeAgent
-        from agent import KubeAgent
+        from agents import KubeAgent
         
         # Create agent instance
         agent = KubeAgent()

@@ -7,7 +7,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.language_models.chat_models import BaseChatModel
 import dotenv
 
-from .prompt import REACT_PROMPT
+from agents.kube_prompt import REACT_PROMPT
 from tools import *
 
 # Load environment variables

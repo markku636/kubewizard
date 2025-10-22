@@ -41,10 +41,11 @@ KubeWizard 是一個智能的 Kubernetes 管理助手，使用 Google Gemini AI 
 
 ```
 kubewizard/
-├── agent/                      # KubeAgent 核心代理
+├── agents/                     # AI Agents 模組
 │   ├── __init__.py
-│   ├── agent.py               # 主要 Agent 邏輯（LangChain Agent）
-│   └── prompt.py              # AI 提示詞模板
+│   ├── kube_agent.py          # Kubernetes 管理 Agent
+│   ├── kube_prompt.py         # KubeAgent 提示詞模板
+│   └── README.md              # Agents 使用說明
 ├── tools/                      # LangChain 工具集
 │   ├── __init__.py
 │   ├── kubetool.py            # Kubernetes 工具（kubectl、helm）
@@ -61,6 +62,11 @@ kubewizard/
 │       ├── __init__.py
 │       ├── chat.py            # 聊天端點
 │       └── memory.py          # 記憶管理端點
+├── tests/                      # 測試模組
+│   ├── __init__.py
+│   ├── test_units.py          # 單元測試腳本
+│   ├── test_api.py            # API 測試腳本
+│   └── README.md              # 測試使用說明
 ├── utils/                      # 工具函數
 │   ├── __init__.py
 │   └── console.py             # Rich 控制台工具
@@ -68,8 +74,6 @@ kubewizard/
 │   ├── __init__.py
 │   └── app.py                 # 交互式 CLI 應用
 ├── main.py                     # CLI 啟動入口
-├── test_units.py              # 單元測試腳本
-├── test_api.py                # API 測試腳本
 ├── requirements.txt           # Python 依賴列表
 ├── Dockerfile                 # Docker 映像定義
 ├── docker-compose.yml         # Docker Compose 配置
@@ -317,6 +321,11 @@ DELETE /api/memory/{user_id}
 測試配置、KubeAgent、記憶服務和 API 模型：
 
 ```bash
+# 從專案根目錄運行
+python tests/test_units.py
+
+# 或進入 tests 目錄
+cd tests
 python test_units.py
 ```
 
@@ -366,8 +375,10 @@ API 模型          ✅ 通過
 python -m kubewizard_linebot.api
 
 # 終端 2: 運行 API 測試
-python test_api.py
+python tests/test_api.py
 ```
+
+> 💡 **提示**: 查看 [tests/README.md](tests/README.md) 了解更多測試相關信息。
 
 ## 🔧 配置說明
 
@@ -430,7 +441,7 @@ python test_api.py
 KubeWizard 採用模組化架構：
 
 ```
-核心層 (agent/)
+核心層 (agents/)
   └─> KubeAgent: LangChain Agent 主邏輯
        └─> 工具層 (tools/): Kubernetes、搜尋、HTTP 等工具
        
@@ -442,44 +453,76 @@ API 層 (kubewizard_linebot/)
 
 應用層 (app/, main.py)
   └─> CLI 交互式界面
+
+測試層 (tests/)
+  ├─> 單元測試
+  └─> API 測試
 ```
 
-### 添加新工具
+### 添加新 Agent
 
-1. 在 `tools/` 目錄下創建新工具文件：
+1. 在 `agents/` 目錄下創建新 Agent 文件：
 
 ```python
-# tools/my_tool.py
-from langchain.tools import tool
+# agents/database_agent.py
+from langchain.agents import create_react_agent, AgentExecutor
+from langchain_google_genai import ChatGoogleGenerativeAI
+from agents.database_prompt import DATABASE_PROMPT
+from tools import *
 
-@tool
-def my_kubernetes_tool(query: str) -> str:
-    """
-    我的自定義 Kubernetes 工具
+class DatabaseAgent:
+    """Database 管理專用 Agent"""
     
-    Args:
-        query: 查詢參數
+    def __init__(self, llm=None):
+        if llm is None:
+            llm = ChatGoogleGenerativeAI(
+                model="gemini-2.0-flash-exp",
+                temperature=0.7
+            )
         
-    Returns:
-        str: 工具執行結果
-    """
-    # 實現工具邏輯
-    result = execute_command(query)
-    return result
+        self.llm = llm
+        self.tools = [
+            # 添加相關工具
+        ]
+        
+        self.agent = create_react_agent(
+            llm=self.llm,
+            tools=self.tools,
+            prompt=DATABASE_PROMPT
+        )
+        
+        self.agent_executor = AgentExecutor(
+            agent=self.agent,
+            tools=self.tools,
+            verbose=True
+        )
+    
+    def invoke(self, input_text: str):
+        """執行 Agent"""
+        return self.agent_executor.invoke({"input": input_text})
 ```
 
-2. 在 `agent/agent.py` 中註冊工具：
+2. 創建對應的提示詞文件：
 
 ```python
-from tools.my_tool import my_kubernetes_tool
+# agents/database_prompt.py
+from langchain_core.prompts import PromptTemplate
 
-# 在 KubeAgent 類的 __init__ 方法中
-self.tools = [
-    kubetool,
-    my_kubernetes_tool,  # 添加新工具
-    # ... 其他工具
-]
+DATABASE_PROMPT = PromptTemplate.from_template("""
+你是一個 Database 管理專家...
+""")
 ```
+
+3. 在 `agents/__init__.py` 中導出新 Agent：
+
+```python
+from agents.kube_agent import KubeAgent
+from agents.database_agent import DatabaseAgent
+
+__all__ = ['KubeAgent', 'DatabaseAgent']
+```
+
+> 💡 **提示**: 查看 [agents/README.md](agents/README.md) 了解更多 Agent 開發指南。
 
 ### 添加新 API 端點
 

@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 # Add project root to path
-project_root = Path(__file__).parent
+project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 
@@ -30,7 +30,7 @@ def test_kube_agent():
     """測試 KubeAgent"""
     print("\n2. 測試 KubeAgent...")
     try:
-        from agent import KubeAgent
+        from agents import KubeAgent
         agent = KubeAgent()
         print(f"   ✅ KubeAgent 創建成功")
         
