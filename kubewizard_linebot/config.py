@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     
     # AI Configuration
     ai_google_api_key: str = Field(..., env="AI_GOOGLE_API_KEY")
-    ai_model: str = Field(default="gemini-2.0-flash-exp", env="AI_MODEL")
+    ai_model: str = Field(default="gemini-2.0-flash", env="AI_MODEL")
     ai_temperature: float = Field(default=0.7, env="AI_TEMPERATURE")
     
     # LINE Bot Configuration

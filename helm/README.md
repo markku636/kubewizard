@@ -161,7 +161,7 @@ ingress:
 
 | 參數 | 說明 | 預設值 |
 |------|------|--------|
-| `env.AI_MODEL` | AI 模型 | `gemini-2.0-flash-exp` |
+| `env.AI_MODEL` | AI 模型 | `gemini-1.5-flash-latest` |
 | `env.AI_TEMPERATURE` | 溫度參數 | `0.7` |
 | `env.DEBUG_LEVEL` | 調試級別 | `1` |
 | `env.LOG_LEVEL` | 日誌級別 | `INFO` |

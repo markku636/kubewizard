@@ -130,7 +130,7 @@ cp .env.example .env
 ```env
 # AI Configuration（必填）
 AI_GOOGLE_API_KEY=your_gemini_api_key_here
-AI_MODEL=gemini-2.0-flash-exp
+AI_MODEL=gemini-1.5-flash-latest
 AI_TEMPERATURE=0.7
 
 # Kubernetes Configuration（可選）
@@ -253,7 +253,7 @@ GET /health
   "status": "healthy",
   "services": {
     "gemini_ai": "configured",
-    "ai_model": "gemini-2.0-flash-exp",
+    "ai_model": "gemini-1.5-flash-latest",
     "redis": "connected",
     "kube_agent": "available"
   },
@@ -385,7 +385,7 @@ python test_units.py
 
 1. 測試配置...
    ✅ 配置正常
-   - AI Model: gemini-2.0-flash-exp
+   - AI Model: gemini-1.5-flash-latest
    - Redis URL: redis://localhost:6379/0
 
 2. 測試 KubeAgent...
@@ -435,15 +435,16 @@ python tests/test_api.py
 | 變數 | 說明 | 默認值 | 必填 |
 |------|------|--------|------|
 | `AI_GOOGLE_API_KEY` | Google Gemini API 密鑰 | - | ✅ 是 |
-| `AI_MODEL` | 使用的 AI 模型 | `gemini-2.0-flash-exp` | ❌ 否 |
+| `AI_MODEL` | 使用的 AI 模型 | `gemini-1.5-flash-latest` | ❌ 否 |
 | `AI_TEMPERATURE` | 溫度參數（0-1，控制創造性） | `0.7` | ❌ 否 |
 
 **獲取 API Key**: 訪問 [Google AI Studio](https://makersuite.google.com/app/apikey)
 
 **可用模型**:
-- `gemini-2.0-flash-exp` - 最新實驗版本（推薦）
-- `gemini-1.5-pro` - 穩定版本
-- `gemini-1.5-flash` - 快速版本
+- `gemini-1.5-flash-latest` - 最新穩定版本（推薦）
+- `gemini-1.5-pro-latest` - 最強大的模型
+- `gemini-pro` - 標準穩定版本
+- `gemini-2.0-flash-exp` - 實驗版本（可能不穩定）
 
 ### Kubernetes 配置
 
@@ -568,7 +569,7 @@ class DatabaseAgent:
     def __init__(self, llm=None):
         if llm is None:
             llm = ChatGoogleGenerativeAI(
-                model="gemini-2.0-flash-exp",
+                model="gemini-1.5-flash-latest",
                 temperature=0.7
             )
         
@@ -742,20 +743,24 @@ def test_my_feature():
 **A**: 修改 `.env` 文件中的 `AI_MODEL` 變數：
 
 ```env
-# 使用穩定版本
-AI_MODEL=gemini-1.5-pro
+# 使用最新穩定版本（推薦）
+AI_MODEL=gemini-1.5-flash-latest
 
-# 使用快速版本
-AI_MODEL=gemini-1.5-flash
+# 使用最強大的模型
+AI_MODEL=gemini-1.5-pro-latest
 
-# 使用最新實驗版本（默認）
+# 使用標準穩定版本
+AI_MODEL=gemini-pro
+
+# 使用實驗版本
 AI_MODEL=gemini-2.0-flash-exp
 ```
 
 不同模型的特點：
-- **gemini-2.0-flash-exp**: 最新功能，可能不穩定
-- **gemini-1.5-pro**: 功能最強，速度較慢
-- **gemini-1.5-flash**: 速度最快，適合簡單任務
+- **gemini-1.5-flash-latest**: 最新穩定版，速度快、效能好（推薦）
+- **gemini-1.5-pro-latest**: 功能最強大，適合複雜任務
+- **gemini-pro**: 標準穩定版本，廣泛使用
+- **gemini-2.0-flash-exp**: 實驗版本，可能不穩定或配額限制
 
 ### Q: Docker 部署失敗怎麼辦？
 

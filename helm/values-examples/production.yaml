@@ -85,7 +85,7 @@ affinity:
           topologyKey: kubernetes.io/hostname
 
 env:
-  AI_MODEL: "gemini-2.0-flash-exp"
+  AI_MODEL: "gemini-2.0-flash"
   AI_TEMPERATURE: "0.5"
   DEBUG_LEVEL: "1"
   LOG_LEVEL: "INFO"

@@ -54,7 +54,7 @@ class DatabaseAgent:
     def __init__(self, llm=None):
         if llm is None:
             llm = ChatGoogleGenerativeAI(
-                model="gemini-2.0-flash-exp",
+                model="gemini-1.5-flash-latest",
                 temperature=0.7
             )
         

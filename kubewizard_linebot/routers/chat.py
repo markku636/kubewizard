@@ -32,16 +32,14 @@ async def chat(request: ChatRequest):
         # Import KubeAgent
         from agents import KubeAgent
         
-        # Create agent instance
-        agent = KubeAgent()
+        # Create agent instance with user_id to maintain conversation context
+        # 重要：必須傳入 user_id，這樣每個用戶都有獨立的對話記憶
+        agent = KubeAgent(user_id=request.user_id)
         
         # Get response from agent
+        # agent 內部已經會處理記憶，所以這裡不需要再額外保存
         result = agent.invoke(request.message)
         reply = result.get("output", "抱歉，我無法處理您的請求。")
-        
-        # Save conversation to memory
-        memory_service.add_message(request.user_id, "user", request.message)
-        memory_service.add_message(request.user_id, "assistant", reply)
         
         return ChatResponse(
             reply=reply,

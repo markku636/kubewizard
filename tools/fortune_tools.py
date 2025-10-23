@@ -47,7 +47,7 @@ def bazi_cesuan(query: str):
     prompt = prompt.partial(format_instructions=parser.get_format_instructions())
     
     llm = ChatGoogleGenerativeAI(
-        model=os.getenv("AI_MODEL", "gemini-2.0-flash-exp"),
+        model=os.getenv("AI_MODEL", "gemini-2.0-flash"),
         temperature=0,
         google_api_key=os.getenv("AI_GOOGLE_API_KEY")
     )
@@ -96,7 +96,7 @@ def jiemeng(query: str):
     url = "https://api.yuanfenju.com/index.php/v1/Gongju/zhougong"
     
     llm = ChatGoogleGenerativeAI(
-        model=os.getenv("AI_MODEL", "gemini-2.0-flash-exp"),
+        model=os.getenv("AI_MODEL", "gemini-2.0-flash"),
         temperature=0,
         google_api_key=os.getenv("AI_GOOGLE_API_KEY")
     )

@@ -161,7 +161,7 @@ redis:
 # 環境變數配置
 env:
   # AI 配置（必填）
-  AI_MODEL: "gemini-2.0-flash-exp"
+  AI_MODEL: "gemini-1.5-flash-latest"
   AI_TEMPERATURE: "0.7"
   
   # Kubernetes 配置

@@ -1,3 +1,4 @@
+import logging
 import dotenv
 
 from agents import KubeAgent
@@ -5,7 +6,15 @@ from app import ConsoleApp, Handler
 
 
 def main():
+    # 載入環境變數
     dotenv.load_dotenv()
+    
+    # 設定日誌級別
+    log_level = dotenv.get_key(".env", "LOG_LEVEL") or "INFO"
+    logging.basicConfig(
+        level=getattr(logging, log_level.upper(), logging.INFO),
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
 
     kube_agent = KubeAgent()
 

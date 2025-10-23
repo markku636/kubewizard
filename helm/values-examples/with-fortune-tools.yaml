@@ -7,5 +7,5 @@ secrets:
 
 env:
   ENABLE_FORTUNE_TOOLS: "true"
-  AI_MODEL: "gemini-2.0-flash-exp"
+  AI_MODEL: "gemini-2.0-flash"
   DEBUG_LEVEL: "1"

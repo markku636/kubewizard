@@ -4,6 +4,7 @@ KubeWizard LINE Bot API 主應用
 """
 import sys
 import os
+import logging
 from datetime import datetime
 from pathlib import Path
 
@@ -18,6 +19,10 @@ sys.path.insert(0, str(project_root))
 from kubewizard_linebot.config import get_settings, validate_required_settings
 from kubewizard_linebot.models import HealthResponse
 from kubewizard_linebot.routers import chat, memory, linebot_webhook
+from utils.k8s_config import get_k8s_config_manager
+
+# 設定日誌
+logger = logging.getLogger(__name__)
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -115,6 +120,20 @@ if __name__ == "__main__":
     print("📍 API will be available at: http://localhost:8000")
     print("📖 API documentation: http://localhost:8000/docs")
     print("💚 Health check: http://localhost:8000/health")
+    
+    # 初始化 Kubernetes 配置（自動判斷環境）
+    try:
+        print("\n🔧 初始化 Kubernetes 配置...")
+        k8s_manager = get_k8s_config_manager()
+        if k8s_manager.load_config():
+            if k8s_manager.is_in_cluster:
+                print("✅ Kubernetes 配置已載入 (集群內環境)")
+            else:
+                print("✅ Kubernetes 配置已載入 (本地環境)")
+        else:
+            print("⚠️  無法載入 Kubernetes 配置 (某些功能可能受限)")
+    except Exception as e:
+        print(f"⚠️  初始化 K8s 配置時發生錯誤: {e}")
     
     try:
         validate_required_settings()

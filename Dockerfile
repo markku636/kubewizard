@@ -18,13 +18,17 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # 複製專案檔案
 COPY kubewizard_linebot/ ./kubewizard_linebot/
-COPY agent/ ./agent/
+COPY agents/ ./agents/
 COPY tools/ ./tools/
 COPY utils/ ./utils/
+COPY app/ ./app/
 
 # 設定環境變數
 ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
+
+# 在容器內運行時,將自動使用 in-cluster config
+# 不需要設定 KUBECONFIG 環境變數
 
 # 暴露端口
 EXPOSE 8000
